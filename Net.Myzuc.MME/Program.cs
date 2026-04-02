@@ -1,9 +1,10 @@
-﻿namespace Net.Myzuc.MME;
-
-class Program
+﻿namespace Net.Myzuc.MME
 {
-    static void Main(string[] args)
+    internal static class Program
     {
-        Console.WriteLine("Hello, World!");
+        internal static void Main(string[] args)
+        {
+            Console.WriteLine("Hello, World!");
+        }
     }
 }
