@@ -13,7 +13,7 @@ namespace Net.Myzuc.MME.Networking
         public static void RegisterConnection(Connection connection)
         {
             OnCreate(connection, EventArgs.Empty);
-            //handle
+            //todo: handle
         }
         
         public bool Disposed { get; private set; }
