@@ -81,32 +81,25 @@ namespace Net.Myzuc.MME.Resources
                 Sync.Release();
             }
         }
-        public virtual Task ResetAsync(CancellationToken cancellationToken = default)
+        public virtual async Task ResetAsync(CancellationToken cancellationToken = default)
         {
+            
+            ObjectDisposedException.ThrowIf(Disposed, this);
+            string path = GetPath();
             try
             {
-                ObjectDisposedException.ThrowIf(Disposed, this);
-                string path = GetPath();
-                try
-                {
-                    Logs.Debug($"Deleting resource \"{Identifier}\" at \"{path}\".");
-                    InternalValue = null;
-                    File.Delete(path);
-                    return Task.FromResult<T?>(null);
-                }
-                catch (Exception ex)
-                {
-                    Logs.Warning($"Error while deleting resource \"{Identifier}\" at \"{path}\": {ex}");
-                    return Task.FromResult<T?>(null);
-                }
-                finally
-                {
-                    Sync.Release();
-                }
+                await Sync.WaitAsync(cancellationToken);
+                Logs.Debug($"Deleting resource \"{Identifier}\" at \"{path}\".");
+                InternalValue = null;
+                File.Delete(path);
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                return Task.FromException<T?>(exception);
+                Logs.Warning($"Error while deleting resource \"{Identifier}\" at \"{path}\": {ex}");
+            }
+            finally
+            {
+                Sync.Release();
             }
         }
         public virtual async Task<bool> StartWatchingAsync()
