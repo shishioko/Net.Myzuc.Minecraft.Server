@@ -16,10 +16,15 @@
 
     <ItemGroup>
       <PackageReference Include="Me.Shiokawaii.IO" Version="1.0.4" />
+      <PackageReference Include="MongoDB.Bson" Version="3.7.1" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Net.Myzuc.MME.Data\Net.Myzuc.MME.Data.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Objects\" />
     </ItemGroup>
 
 </Project>
