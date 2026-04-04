@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text;
+using Microsoft.VisualStudio.Threading;
 
 namespace Net.Myzuc.MME
 {
@@ -26,7 +27,7 @@ namespace Net.Myzuc.MME
                 Level = level;
             }
         }
-        private static ConcurrentQueue<LogMessage> Queue = new();
+        private static readonly AsyncQueue<LogMessage> Queue = new();
         public static event EventHandler<LogMessage> OnLine = (sender, args) => { };
         static Logs()
         {
@@ -48,33 +49,20 @@ namespace Net.Myzuc.MME
                     string line = $"[{args.Level}][{args.Origin}]: {args.Message}";
                     (error ? Console.Error : Console.Out).WriteLine(line);
                 };
-                Thread thread = new(
-                    () =>
+                _ = Task.Run(async () =>
+                {
+                    try
                     {
-                        try
+                        while (true)
                         {
-                            while (true)
-                            {
-                                if (!Queue.TryDequeue(out LogMessage? message))
-                                {
-                                    Thread.Yield();
-                                    continue;
-                                }
-                                OnLine(null, message);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Error while logging: {ex}");
+                            OnLine(null, await Queue.DequeueAsync());
                         }
                     }
-                )
-                {
-                    Name = "Myzuc-MME-Logs",
-                    IsBackground = true,
-                    Priority = ThreadPriority.BelowNormal,
-                };
-                thread.Start();
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error while logging: {ex}");
+                    }
+                });
                 try
                 {
                     string directory = Path.Combine(Environment.CurrentDirectory, "Logs");
