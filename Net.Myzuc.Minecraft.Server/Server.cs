@@ -4,7 +4,7 @@ using Net.Myzuc.Minecraft.Server.Extensions;
 
 namespace Net.Myzuc.Minecraft.Server
 {
-    public static class Engine
+    public static class Server
     {
         public static event EventHandler OnStart = (sender, args) => { };
         public static event EventHandler OnStop = (sender, args) => { };
@@ -57,11 +57,11 @@ namespace Net.Myzuc.Minecraft.Server
                 );
                 Logs.Verbose("Initialized modules.");
                 OnStart(null, EventArgs.Empty);
-                Logs.Verbose("Started Engine.");
+                Logs.Verbose("Started Server.");
             }
             catch (Exception ex)
             {
-                Logs.Error($"Error while starting Engine: {ex}");
+                Logs.Error($"Error while starting Server: {ex}");
             }
             await Task.Delay(-1);
         }
@@ -73,7 +73,7 @@ namespace Net.Myzuc.Minecraft.Server
             }
             catch (Exception ex)
             {
-                Logs.Warning($"Error while stopping Engine: {ex}");
+                Logs.Warning($"Error while stopping Server: {ex}");
             }
             Environment.Exit(success ? 0 : 1);
         }

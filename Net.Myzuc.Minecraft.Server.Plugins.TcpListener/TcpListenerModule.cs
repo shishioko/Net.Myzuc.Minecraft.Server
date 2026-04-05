@@ -21,7 +21,7 @@ namespace Net.Myzuc.Minecraft.Server.Modules.TcpListener
                 ];
                 await Config.SaveAsync();
             }
-            Engine.OnStart += (sender, args) =>
+            Server.OnStart += (sender, args) =>
             {
                 try
                 {
