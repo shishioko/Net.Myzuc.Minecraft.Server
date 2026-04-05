@@ -13,10 +13,17 @@
       <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />
       <PackageReference Include="MongoDB.Bson" Version="3.7.1" />
       <PackageReference Include="Net.Myzuc.Minecraft.Common" Version="1.0.0" />
+      <PackageReference Include="NLog" Version="6.1.2" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Objects\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="NLog.config">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

@@ -1,19 +1,21 @@
 ﻿using System.Reflection;
 using System.Runtime.Loader;
 using Net.Myzuc.Minecraft.Server.Extensions;
+using NLog;
 
 namespace Net.Myzuc.Minecraft.Server
 {
     public static class Server
     {
+        internal static readonly Logger Logger = LogManager.GetLogger(Assembly.GetExecutingAssembly().GetName().Name ?? string.Empty);
         public static event EventHandler OnStart = (sender, args) => { };
         public static event EventHandler OnStop = (sender, args) => { };
         internal static async Task Main(string[] args)
         {
             try
             {
-                Logs.Verbose("Starting Engine...");
-                Logs.Verbose("Loading libraries...");
+                Logger.Info("Starting Engine...");
+                Logger.Debug("Loading libraries...");
                 FileInfo[] files = Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "Libraries")).GetFiles("*.dll", SearchOption.AllDirectories);
                 IEnumerable<Assembly> assemblies = (await Task.WhenAll(
                     files.Select(
@@ -22,19 +24,19 @@ namespace Net.Myzuc.Minecraft.Server
                             try
                             {
                                 Assembly assembly = await AssemblyLoadContext.Default.LoadFromAssemblyPathAsync(file.FullName);
-                                Logs.Verbose($"Loaded library \"{assembly.GetName().GetVersionedName()}\" from \"{file.FullName}\".");
+                                Logger.Debug($"Loaded library \"{assembly.GetName().GetVersionedName()}\" from \"{file.FullName}\".");
                                 return assembly;
                             }
                             catch (Exception ex)
                             {
-                                Logs.Warning($"Error while loading library from \"{file.FullName}\": {ex}");
+                                Logger.Debug($"Error while loading library from \"{file.FullName}\": {ex}");
                                 return null;
                             }
                         }
                     )
                 )).Where(assembly => assembly != null)!;
-                Logs.Verbose("Loaded libraries.");
-                Logs.Verbose("Initializing modules...");
+                Logger.Debug("Loaded libraries.");
+                Logger.Debug("Initializing modules...");
                 await Task.WhenAll(
                     assemblies.SelectMany(assembly =>
                         assembly.GetTypes().SelectMany(type =>
@@ -44,24 +46,25 @@ namespace Net.Myzuc.Minecraft.Server
                                     try
                                     {
                                         if (method.Invoke(null, null) is Task task) await task;
-                                        Logs.Verbose($"Initialized module \"{type.Name}\" from \"{assembly.GetName().GetVersionedName()}\" using \"{method.Name}\".");
+                                        Logger.Debug($"Initialized module \"{type.Name}\" from \"{assembly.GetName().GetVersionedName()}\" using \"{method.Name}\".");
                                     }
                                     catch (Exception ex)
                                     {
-                                        Logs.Warning($"Error while initializing module \"{type.Name}\" from \"{assembly.GetName().GetVersionedName()}\" using \"{method.Name}\": {ex}");
+                                        Logger.Debug($"Error while initializing module \"{type.Name}\" from \"{assembly.GetName().GetVersionedName()}\" using \"{method.Name}\": {ex}");
                                     }
                                 }
                             )
                         )
                     )
                 );
-                Logs.Verbose("Initialized modules.");
+                Logger.Debug("Initialized modules.");
                 OnStart(null, EventArgs.Empty);
-                Logs.Verbose("Started Server.");
+                Logger.Info("Started Server.");
             }
             catch (Exception ex)
             {
-                Logs.Error($"Error while starting Server: {ex}");
+                Logger.Fatal($"Error while starting Server: {ex}");
+                Stop(false);
             }
             await Task.Delay(-1);
         }
@@ -70,10 +73,11 @@ namespace Net.Myzuc.Minecraft.Server
             try
             {
                 OnStop(null, EventArgs.Empty);
+                LogManager.Flush();
             }
             catch (Exception ex)
             {
-                Logs.Warning($"Error while stopping Server: {ex}");
+                Logger.Warn($"Error while stopping Server: {ex}");
             }
             Environment.Exit(success ? 0 : 1);
         }

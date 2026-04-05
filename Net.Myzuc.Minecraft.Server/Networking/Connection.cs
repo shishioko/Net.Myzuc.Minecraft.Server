@@ -13,13 +13,13 @@ namespace Net.Myzuc.Minecraft.Server.Networking
         {
             try
             {
-                Logs.Verbose($"Registering connection \"{connection.RemoteEndpoint}\"...");
+                Server.Logger.Debug($"Registering connection \"{connection.RemoteEndpoint}\"...");
                 OnCreate(connection, EventArgs.Empty);
                 //todo: handle
             }
             catch (Exception ex)
             {
-                Logs.Warning($"Error while registering connection \"{connection.RemoteEndpoint}\": {ex}");
+                Server.Logger.Warn($"Error while registering connection \"{connection.RemoteEndpoint}\": {ex}");
             }
         }
         
@@ -63,7 +63,7 @@ namespace Net.Myzuc.Minecraft.Server.Networking
             }
             catch (Exception ex)
             {
-                Logs.Warning($"Error while reading from connection \"{RemoteEndpoint}\": {ex}");
+                Server.Logger.Warn($"Error while reading from connection \"{RemoteEndpoint}\": {ex}");
                 throw;
             }
         }
@@ -76,14 +76,14 @@ namespace Net.Myzuc.Minecraft.Server.Networking
                 ms.WriteS32V(packet.Id);
                 packet.Serialize(ms);
                 await writeRawAsync(ms.ToArray());
-                return;
             }
             catch (Exception ex)
             {
-                Logs.Warning($"Error while reading writing to connection \"{RemoteEndpoint}\": {ex}");
+                Server.Logger.Warn($"Error while reading writing to connection \"{RemoteEndpoint}\": {ex}");
                 throw;
             }
-            
+            return;
+
             async Task writeRawAsync(byte[] data)
             {
                 if (CompressionThreshold >= 0)
