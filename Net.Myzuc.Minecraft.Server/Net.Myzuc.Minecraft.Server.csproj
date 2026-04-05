@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -12,7 +12,7 @@
       <PackageReference Include="Me.Shiokawaii.IO" Version="1.0.4" />
       <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />
       <PackageReference Include="MongoDB.Bson" Version="3.7.1" />
-      <PackageReference Include="Net.Myzuc.Minecraft.Common" Version="1.0.0" />
+      <PackageReference Include="Net.Myzuc.Minecraft.Common" Version="1.0.1" />
       <PackageReference Include="NLog" Version="6.1.2" />
     </ItemGroup>
 
