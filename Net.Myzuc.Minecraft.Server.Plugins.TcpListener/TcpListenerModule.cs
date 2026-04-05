@@ -1,9 +1,10 @@
-﻿using System.Collections.Concurrent;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using Net.Myzuc.Minecraft.Server.Networking;
 using Net.Myzuc.Minecraft.Server.Objects.Attributes;
 using Net.Myzuc.Minecraft.Server.Resources;
+using NLog;
 
 namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
 {
@@ -26,7 +27,7 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
                 }
                 catch (Exception ex)
                 {
-                    Logs.Warning($"Error while initializing: {ex}");
+                    Logger.Warn($"Error while initializing: {ex}");
                 }
             };
         }
@@ -37,7 +38,7 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
                 using Socket socket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 socket.Bind(endpoint);
                 socket.Listen();
-                Logs.Verbose($"Listening on {endpoint}.");
+                Logger.Debug($"Listening on {endpoint}.");
                 while (true)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -49,13 +50,13 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
                     }
                     catch (Exception ex)
                     {
-                        Logs.Warning($"Error while handling connection from {client.RemoteEndPoint} on {endpoint}: {ex}");
+                        Logger.Warn($"Error while handling connection from {client.RemoteEndPoint} on {endpoint}: {ex}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Logs.Warning($"Error while listening on {endpoint}: {ex}");
+                Logger.Warn($"Error while listening on {endpoint}: {ex}");
             }
         }
     }
