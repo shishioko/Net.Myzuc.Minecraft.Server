@@ -12,10 +12,7 @@
       <PackageReference Include="Me.Shiokawaii.IO" Version="1.0.4" />
       <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />
       <PackageReference Include="MongoDB.Bson" Version="3.7.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Net.Myzuc.Minecraft.Common\Net.Myzuc.Minecraft.Common.csproj" />
+      <PackageReference Include="Net.Myzuc.Minecraft.Common" Version="1.0.0" />
     </ItemGroup>
 
     <ItemGroup>
