@@ -1,6 +1,6 @@
 namespace Net.Myzuc.Minecraft.Server.Resources
 {
-    public abstract class Asset<T> : Storage<T> where T : class
+    public abstract class Asset<T> : Resource<T> where T : class
     {
         protected Asset(string identifier) : base(identifier)
         {
