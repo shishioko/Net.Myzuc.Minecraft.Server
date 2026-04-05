@@ -1,0 +1,32 @@
+namespace Net.Myzuc.Minecraft.Server.Resources
+{
+    public abstract class Asset<T> : Storage<T> where T : class
+    {
+        protected Asset(string identifier) : base(identifier)
+        {
+            
+        }
+        public override async Task<T?> LoadAsync(CancellationToken cancellationToken = default)
+        {
+            T? value = await base.LoadAsync(cancellationToken);
+            if (value is null) Logs.Warning($"Unable to load asset \"{Identifier}\"!");
+            return value;
+        }
+        public override sealed Task SaveAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotSupportedException();
+        }
+        public override sealed Task ResetAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotSupportedException();
+        }
+        public override sealed byte[] Serialize(T data)
+        {
+            throw new NotSupportedException();
+        }
+        protected override string GetPath()
+        {
+            return Path.Combine(Environment.CurrentDirectory, "Assets", $"{Identifier.Replace('.', '/')}");
+        }
+    }
+}

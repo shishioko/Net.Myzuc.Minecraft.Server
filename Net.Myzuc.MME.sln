@@ -1,17 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net.Myzuc.MME", "Net.Myzuc.MME\Net.Myzuc.MME.csproj", "{085DCD24-677F-48A3-9768-4E6BB1520260}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net.Myzuc.Minecraft.Server", "Net.Myzuc.Minecraft.Server\Net.Myzuc.Minecraft.Server.csproj", "{085DCD24-677F-48A3-9768-4E6BB1520260}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8AC600ED-1853-472A-BC95-B4F286C6BAD3}"
 	ProjectSection(SolutionItems) = preProject
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net.Myzuc.MME.Data", "Net.Myzuc.MME.Data\Net.Myzuc.MME.Data.csproj", "{DEB2F667-3857-455E-B538-CF2C49E402D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net.Myzuc.Minecraft.Common", "Net.Myzuc.Minecraft.Common\Net.Myzuc.Minecraft.Common.csproj", "{DEB2F667-3857-455E-B538-CF2C49E402D4}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Net.Myzuc.MME.Modules", "Net.Myzuc.MME.Modules", "{084878CD-452F-45CE-97BA-5D63B941196C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Net.Myzuc.Minecraft.Server.Plugins", "Net.Myzuc.Minecraft.Server.Plugins", "{084878CD-452F-45CE-97BA-5D63B941196C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net.Myzuc.MME.Modules.TcpListener", "Net.Myzuc.MME.Modules.TcpListener\Net.Myzuc.MME.Modules.TcpListener.csproj", "{12E77AB9-46C8-4243-B85A-F01BC7FCFE39}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net.Myzuc.Minecraft.Server.Plugins.TcpListener", "Net.Myzuc.Minecraft.Server.Plugins.TcpListener\Net.Myzuc.Minecraft.Server.Plugins.TcpListener.csproj", "{12E77AB9-46C8-4243-B85A-F01BC7FCFE39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
