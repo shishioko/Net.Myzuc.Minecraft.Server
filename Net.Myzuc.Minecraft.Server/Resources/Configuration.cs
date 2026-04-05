@@ -6,11 +6,6 @@ namespace Net.Myzuc.Minecraft.Server.Resources
         {
             
         }
-        public async Task<T> LoadOrResetAsync()
-        {
-            if (await LoadAsync() is null) await ResetAsync();
-            return Value;
-        }
         public override sealed async Task<T?> ResetAsync(CancellationToken cancellationToken = default)
         {
             Value = new();

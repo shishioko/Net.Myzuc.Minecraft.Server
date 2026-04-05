@@ -8,9 +8,8 @@ namespace Net.Myzuc.Minecraft.Server.Resources
             get
             {
                 ObjectDisposedException.ThrowIf(Disposed, this);
-                if (InternalValue is not null) return InternalValue;
-                Logs.Debug($"Tried to read unloaded resource \"{Identifier}\"!");
-                throw new InvalidOperationException("Tried to read unloaded resource.");
+                if (InternalValue is null) throw new NullReferenceException();
+                return InternalValue;
             }
             set
             {
@@ -36,27 +35,32 @@ namespace Net.Myzuc.Minecraft.Server.Resources
             if (identifier.Any(c => Path.GetInvalidFileNameChars().Contains(c))) throw new ArgumentException("Malformed identifier!");
             Identifier = identifier;
         }
-        public virtual async Task<T?> LoadAsync(CancellationToken cancellationToken = default)
+        public virtual async Task LoadAsync(CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(Disposed, this);
             string path = GetPath();
             try
             {
                 await Sync.WaitAsync(cancellationToken);
-                Logs.Debug($"Loading resource \"{Identifier}\" at \"{path}\".");
-                if (!File.Exists(path)) return null;
                 byte[] data = await File.ReadAllBytesAsync(path, cancellationToken);
-                return InternalValue = Deserialize(data);
-            }
-            catch (Exception ex)
-            {
-                Logs.Warning($"Error while loading resource \"{Identifier}\" at \"{path}\": {ex}");
-                return null;
+                InternalValue = Deserialize(data);
             }
             finally
             {
                 Sync.Release();
             }
+        }
+        public async Task<T?> LoadOrResetAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await LoadAsync(cancellationToken);
+            }
+            catch (Exception)
+            {
+                await ResetAsync(cancellationToken);
+            }
+            return Value;
         }
         public virtual async Task SaveAsync(CancellationToken cancellationToken = default)
         {
@@ -65,16 +69,11 @@ namespace Net.Myzuc.Minecraft.Server.Resources
             try
             {
                 await Sync.WaitAsync(cancellationToken);
-                Logs.Debug($"Saving resource \"{Identifier}\" at \"{path}\".");
                 byte[] data = Serialize(Value);
                 if (Watcher is not null) Watcher.EnableRaisingEvents = false;
-                Directory.CreateDirectory(Path.GetDirectoryName(path) ?? throw new NullReferenceException());
+                Directory.CreateDirectory(Path.GetDirectoryName(path) ?? string.Empty);
                 await File.WriteAllBytesAsync(path, data, cancellationToken);
                 if (Watcher is not null) Watcher.EnableRaisingEvents = true;
-            }
-            catch (Exception ex)
-            {
-                Logs.Warning($"Error while saving resource \"{Identifier}\" at \"{path}\": {ex}");
             }
             finally
             {
@@ -83,19 +82,13 @@ namespace Net.Myzuc.Minecraft.Server.Resources
         }
         public virtual async Task ResetAsync(CancellationToken cancellationToken = default)
         {
-            
             ObjectDisposedException.ThrowIf(Disposed, this);
             string path = GetPath();
             try
             {
                 await Sync.WaitAsync(cancellationToken);
-                Logs.Debug($"Deleting resource \"{Identifier}\" at \"{path}\".");
                 InternalValue = null;
                 File.Delete(path);
-            }
-            catch (Exception ex)
-            {
-                Logs.Warning($"Error while deleting resource \"{Identifier}\" at \"{path}\": {ex}");
             }
             finally
             {
@@ -110,7 +103,6 @@ namespace Net.Myzuc.Minecraft.Server.Resources
             {
                 await Sync.WaitAsync();
                 if (Watcher is not null) return true;
-                Logs.Debug($"Watching resource \"{Identifier}\" at \"{path}\".");
                 Watcher = new(Path.GetDirectoryName(path) ?? throw new NullReferenceException())
                 {
                     Filter = Path.GetFileName(path),
@@ -136,9 +128,8 @@ namespace Net.Myzuc.Minecraft.Server.Resources
                 };
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Logs.Warning($"Error while watching resource \"{Identifier}\" at \"{path}\": {ex}");
                 return false;
             }
             finally

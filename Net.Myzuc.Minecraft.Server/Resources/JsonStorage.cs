@@ -5,7 +5,7 @@ using Net.Myzuc.Minecraft.Server.Objects.JsonConverters;
 
 namespace Net.Myzuc.Minecraft.Server.Resources
 {
-    public sealed class JsonStorage<T> : Storage<T> where T : class
+    public sealed class JsonStorage<T> : Storage<T> where T : class, new()
     {
         private JsonSerializerOptions JsonSerializerOptions { get; }
         public JsonStorage(string identifier, JsonSerializerOptions? jsonSerializerOptions = null) : base(identifier)

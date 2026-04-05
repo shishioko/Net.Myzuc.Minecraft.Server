@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization;
 
 namespace Net.Myzuc.Minecraft.Server.Resources
 {
-    public sealed class BsonStorage<T> : Storage<T> where T : class
+    public sealed class BsonStorage<T> : Storage<T> where T : class, new()
     {
         private BsonBinaryReaderSettings BsonBinaryReaderSettings { get; }
         private BsonBinaryWriterSettings BsonBinaryWriterSettings { get; }

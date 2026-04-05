@@ -2,7 +2,7 @@ using Me.Shiokawaii.IO;
 
 namespace Net.Myzuc.Minecraft.Server.Resources
 {
-    public sealed class BinaryStorage<T> : Storage<T> where T : class
+    public sealed class BinaryStorage<T> : Storage<T> where T : class, new()
     {
         public BinaryStorage(string identifier) : base(identifier)
         {
