@@ -14,7 +14,7 @@ namespace Net.Myzuc.Minecraft.Server
         {
             try
             {
-                Logger.Info("Starting Engine...");
+                Logger.Info("Starting server...");
                 Logger.Debug("Loading libraries...");
                 FileInfo[] files = Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "Libraries")).GetFiles("*.dll", SearchOption.AllDirectories);
                 IEnumerable<Assembly> assemblies = (await Task.WhenAll(
@@ -59,7 +59,7 @@ namespace Net.Myzuc.Minecraft.Server
                 );
                 Logger.Debug("Initialized modules.");
                 OnStart(null, EventArgs.Empty);
-                Logger.Info("Started Server.");
+                Logger.Info("Started server.");
             }
             catch (Exception ex)
             {
