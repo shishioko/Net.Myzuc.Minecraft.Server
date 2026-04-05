@@ -9,7 +9,7 @@ namespace Net.Myzuc.Minecraft.Server.Modules.TcpListener
 {
     public static class TcpListenerModule
     {
-        private static readonly JsonConfiguration<ConcurrentBag<IPEndPoint>> Config = new("MMEModule.TcpListener.Endpoints");
+        private static readonly JsonConfiguration<List<IPEndPoint>> Config = new("MMEModule.TcpListener.Endpoints");
         [ModuleInitializer]
         private static async Task InitializeAsync()
         {
