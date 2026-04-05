@@ -75,5 +75,17 @@ namespace Net.Myzuc.MME
             await Task.Delay(-1);
             //todo: shutdown handler and method
         }
+        public static void Stop(bool success)
+        {
+            try
+            {
+                OnStop(null, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                Logs.Warning($"Error while stopping Engine: {ex}");
+            }
+            Environment.Exit(success ? 0 : 1);
+        }
     }
 }
