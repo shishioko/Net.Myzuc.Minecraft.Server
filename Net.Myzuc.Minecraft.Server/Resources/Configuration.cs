@@ -14,7 +14,7 @@ namespace Net.Myzuc.Minecraft.Server.Resources
         }
         protected override string GetPath()
         {
-            return Path.Combine(Environment.CurrentDirectory, "Configurations", $"{Identifier.Replace('.', '/')}");
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configurations", $"{Identifier.Replace('.', '/')}");
         }
     }
 }
