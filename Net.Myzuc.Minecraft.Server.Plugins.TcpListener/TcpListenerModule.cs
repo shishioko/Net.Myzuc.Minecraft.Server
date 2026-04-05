@@ -5,7 +5,7 @@ using Net.Myzuc.Minecraft.Server.Networking;
 using Net.Myzuc.Minecraft.Server.Objects.Attributes;
 using Net.Myzuc.Minecraft.Server.Resources;
 
-namespace Net.Myzuc.Minecraft.Server.Modules.TcpListener
+namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
 {
     public static class TcpListenerModule
     {
