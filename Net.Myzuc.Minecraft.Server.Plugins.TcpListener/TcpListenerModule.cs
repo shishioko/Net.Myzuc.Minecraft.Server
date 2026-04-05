@@ -9,23 +9,17 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
 {
     public static class TcpListenerModule
     {
-        private static readonly JsonConfiguration<List<IPEndPoint>> Config = new("MMEModule.TcpListener.Endpoints");
+        internal static readonly Logger Logger = LogManager.GetLogger(Assembly.GetExecutingAssembly().GetName().Name ?? string.Empty);
+        private static readonly JsonConfiguration<TcpListenerConfiguration> Config = new("MMEModule.TcpListener.Endpoints");
         [ModuleInitializer]
         private static async Task InitializeAsync()
         {
-            if (await Config.LoadAsync() is null)
-            {
-                Config.Value =
-                [
-                    new(IPAddress.Any, 25565)
-                ];
-                await Config.SaveAsync();
-            }
+            await Config.LoadAsync();
             Server.OnStart += (sender, args) =>
             {
                 try
                 {
-                    foreach (IPEndPoint endpoint in Config.Value)
+                    foreach (IPEndPoint endpoint in Config.Value.Endpoints)
                     {
                         _ = ListenAsync(endpoint);
                     }
