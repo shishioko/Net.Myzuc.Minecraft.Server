@@ -6,8 +6,6 @@ namespace Net.Myzuc.Minecraft.Server
 {
     public static class Engine
     {
-        public static string MinecraftVersionName { get; } = "1.21.11";
-        public static int MinecraftVersionProtocol { get; } = 774;
         public static event EventHandler OnStart = (sender, args) => { };
         public static event EventHandler OnStop = (sender, args) => { };
         internal static async Task Main(string[] args)
