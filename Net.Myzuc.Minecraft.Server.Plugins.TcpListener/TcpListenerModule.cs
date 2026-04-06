@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using Net.Myzuc.Minecraft.Server.Networking;
 using Net.Myzuc.Minecraft.Server.Objects.Attributes;
 using Net.Myzuc.Minecraft.Server.Resources;
 using NLog;
@@ -45,8 +44,7 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
                     Socket client = await socket.AcceptAsync(cancellationToken);
                     try
                     {
-                        Connection connection = new(new NetworkStream(client, true), client.RemoteEndPoint);
-                        Connection.RegisterConnection(connection);
+                        _ = Server.HandleConnectionAsync(client);
                     }
                     catch (Exception ex)
                     {

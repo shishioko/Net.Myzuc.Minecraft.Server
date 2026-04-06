@@ -1,5 +1,9 @@
-﻿using System.Reflection;
+﻿using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.Loader;
+using Net.Myzuc.Minecraft.Common.Protocol;
+using Net.Myzuc.Minecraft.Common.Protocol.Packets;
 using Net.Myzuc.Minecraft.Server.Extensions;
 using NLog;
 
@@ -80,6 +84,33 @@ namespace Net.Myzuc.Minecraft.Server
                 Logger.Warn($"Error while stopping Server: {ex}");
             }
             Environment.Exit(success ? 0 : 1);
+        }
+        public static async Task HandleConnectionAsync(Socket socket)
+        {
+            try
+            {
+                using Connection connection = new Connection(socket);
+                HandshakePacket handshake = await connection.ReadAsync<HandshakePacket>();
+                switch (connection.ProtocolStage)
+                {
+                    case ProtocolStage.Status:
+                    {
+                        break;
+                    }
+                    case ProtocolStage.Login:
+                    {
+                        break;
+                    }
+                    default:
+                    {
+                        throw new ProtocolViolationException("Unknown Intent!");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug($"Error while handling connection from {socket.RemoteEndPoint}: {ex}");
+            }
         }
     }
 }
