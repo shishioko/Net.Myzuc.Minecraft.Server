@@ -16,7 +16,7 @@ namespace Net.Myzuc.Minecraft.Server.Resources
                 {
                     new IPEndPointConverter()
                 },
-                PreferredObjectCreationHandling = JsonObjectCreationHandling.Populate,
+                PreferredObjectCreationHandling = JsonObjectCreationHandling.Replace,
             
                 NumberHandling =  JsonNumberHandling.AllowReadingFromString |  JsonNumberHandling.AllowNamedFloatingPointLiterals,
             
