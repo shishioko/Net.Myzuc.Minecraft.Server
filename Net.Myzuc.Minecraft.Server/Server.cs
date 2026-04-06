@@ -89,6 +89,8 @@ namespace Net.Myzuc.Minecraft.Server
         {
             try
             {
+                socket.ReceiveTimeout = 30000;
+                socket.SendTimeout = 30000;
                 await using Connection connection = new(socket, true);
                 HandshakePacket handshake = await connection.ReadAsync<HandshakePacket>();
                 switch (connection.ProtocolStage)
