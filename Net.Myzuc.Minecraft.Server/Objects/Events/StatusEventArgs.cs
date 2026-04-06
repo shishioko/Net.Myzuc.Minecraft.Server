@@ -1,6 +1,6 @@
 using Net.Myzuc.Minecraft.Common.Objects;
 
-namespace Net.Myzuc.Minecraft.Server.Events
+namespace Net.Myzuc.Minecraft.Server.Objects.Events
 {
     public class StatusEventArgs
     {

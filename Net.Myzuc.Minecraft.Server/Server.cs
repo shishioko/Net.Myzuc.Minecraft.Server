@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
-using Net.Myzuc.Minecraft.Server.Events;
+using Net.Myzuc.Minecraft.Server.Objects.Events;
 using Net.Myzuc.Minecraft.Server.Extensions;
 using Net.Myzuc.Minecraft.Server.Resources;
 using NLog;
