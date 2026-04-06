@@ -76,6 +76,7 @@ namespace Net.Myzuc.Minecraft.Server
         {
             try
             {
+                Logger.Info("Stopping server.");
                 OnStop(null, EventArgs.Empty);
                 LogManager.Flush();
             }
