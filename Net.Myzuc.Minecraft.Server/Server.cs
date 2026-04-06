@@ -89,7 +89,7 @@ namespace Net.Myzuc.Minecraft.Server
         {
             try
             {
-                using Connection connection = new Connection(socket, true);
+                await using Connection connection = new(socket, true);
                 HandshakePacket handshake = await connection.ReadAsync<HandshakePacket>();
                 switch (connection.ProtocolStage)
                 {
