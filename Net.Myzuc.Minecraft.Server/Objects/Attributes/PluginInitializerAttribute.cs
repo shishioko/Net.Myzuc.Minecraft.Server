@@ -1,7 +1,7 @@
 namespace Net.Myzuc.Minecraft.Server.Objects.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class ModuleInitializerAttribute : Attribute
+    public class PluginInitializerAttribute : Attribute
     {
         
     }

@@ -11,7 +11,7 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
     {
         internal static readonly Logger Logger = LogManager.GetLogger(Assembly.GetExecutingAssembly().GetName().Name ?? string.Empty);
         private static readonly JsonConfiguration<TcpListenerConfiguration> Config = new("Net.Myzuc.Minecraft.Server.Plugins.TcpListener:Configuration");
-        [ModuleInitializer]
+        [PluginInitializer]
         private static async Task InitializeAsync()
         {
             await Config.LoadAsync();
