@@ -6,6 +6,17 @@ namespace Net.Myzuc.Minecraft.Server.Resources
         {
             
         }
+        public override async Task LoadAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await base.LoadAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                if (!File.Exists(GetPath())) await ResetAsync(cancellationToken);
+            }
+        }
         public override sealed async Task<T?> ResetAsync(CancellationToken cancellationToken = default)
         {
             Value = new();
