@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
+using Net.Myzuc.Minecraft.Server.Events;
 using Net.Myzuc.Minecraft.Server.Extensions;
 using Net.Myzuc.Minecraft.Server.Resources;
 using NLog;
@@ -16,6 +17,7 @@ namespace Net.Myzuc.Minecraft.Server
         internal static readonly JsonConfiguration<ServerConfiguration> Config = new("Net.Myzuc.Minecraft.Server:Configuration");
         public static event EventHandler OnStart = (sender, args) => { };
         public static event EventHandler OnStop = (sender, args) => { };
+        public static event EventHandler<StatusEventArgs> OnStatus = (sender, args) => { };
         internal static async Task Main(string[] args)
         {
             try
@@ -101,10 +103,47 @@ namespace Net.Myzuc.Minecraft.Server
                 {
                     case ProtocolStage.Status:
                     {
-                        break;
+                        while (true)
+                        {
+                            Packet packet = await connection.ReadAsync();
+                            switch (packet)
+                            {
+                                case StatusRequestPacket statusRequestPacket:
+                                {
+                                    StatusEventArgs args = new()
+                                    {
+                                        Status = null
+                                    };
+                                    OnStatus(connection, args);
+                                    if (args.Status is null) return;
+                                    await connection.WriteAsync(
+                                        new StatusResponsePacket()
+                                        {
+                                            Status = args.Status
+                                        }
+                                    );
+                                    break;
+                                }
+                                case PingRequestPacket pingRequestPacket:
+                                {
+                                    await connection.WriteAsync(
+                                        new PingResponsePacket()
+                                        {
+                                            Data = pingRequestPacket.Data
+                                        }
+                                    );
+                                    break;
+                                }
+                                default:
+                                {
+                                    throw new ProtocolViolationException("Unexpected Packet!");
+                                }
+                            }
+                        }
                     }
                     case ProtocolStage.Login:
                     {
+                        throw new NotImplementedException();
                         break;
                     }
                     default:
