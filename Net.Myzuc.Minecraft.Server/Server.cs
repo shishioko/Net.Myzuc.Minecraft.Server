@@ -21,6 +21,7 @@ namespace Net.Myzuc.Minecraft.Server
             try
             {
                 Logger.Info("Starting server...");
+                await Config.LoadAsync();
                 Logger.Debug("Loading libraries...");
                 FileInfo[] files = Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Libraries")).GetFiles("*.dll", SearchOption.AllDirectories);
                 IEnumerable<Assembly> assemblies = (await Task.WhenAll(
