@@ -5,6 +5,7 @@ using System.Runtime.Loader;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
 using Net.Myzuc.Minecraft.Server.Extensions;
+using Net.Myzuc.Minecraft.Server.Resources;
 using NLog;
 
 namespace Net.Myzuc.Minecraft.Server
@@ -12,6 +13,7 @@ namespace Net.Myzuc.Minecraft.Server
     public static class Server
     {
         internal static readonly Logger Logger = LogManager.GetLogger(Assembly.GetExecutingAssembly().GetName().Name ?? string.Empty);
+        internal static readonly JsonConfiguration<ServerConfiguration> Config = new("Net.Myzuc.Minecraft.Server:Configuration");
         public static event EventHandler OnStart = (sender, args) => { };
         public static event EventHandler OnStop = (sender, args) => { };
         internal static async Task Main(string[] args)
@@ -90,8 +92,8 @@ namespace Net.Myzuc.Minecraft.Server
         {
             try
             {
-                socket.ReceiveTimeout = 30000;
-                socket.SendTimeout = 30000;
+                socket.ReceiveTimeout = Config.Value.Timeout;
+                socket.SendTimeout = Config.Value.Timeout;
                 await using Connection connection = new(socket, true);
                 HandshakePacket handshake = await connection.ReadAsync<HandshakePacket>();
                 switch (connection.ProtocolStage)
