@@ -9,7 +9,6 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
 {
     public static class TcpListenerModule
     {
-        internal static readonly Logger Logger = LogManager.GetLogger(Assembly.GetExecutingAssembly().GetName().Name ?? string.Empty);
         private static readonly JsonConfiguration<TcpListenerConfiguration> Config = new("Net.Myzuc.Minecraft.Server.Plugins.TcpListener:Configuration");
         [PluginInitializer]
         private static async Task InitializeAsync()
@@ -26,7 +25,7 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
                 }
                 catch (Exception ex)
                 {
-                    Logger.Warn($"Error while initializing: {ex}");
+                    Server.Logger.Warn($"Error while initializing: {ex}");
                 }
             };
         }
@@ -37,18 +36,18 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
                 using Socket socket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 socket.Bind(endpoint);
                 socket.Listen();
-                Logger.Debug($"Listening on {endpoint}.");
+                Server.Logger.Debug($"Listening on {endpoint}.");
                 while (true)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     Socket client = await socket.AcceptAsync(cancellationToken);
-                    Logger.Debug($"Registering connection from {client.RemoteEndPoint}.");
+                    Server.Logger.Debug($"Registering connection from {client.RemoteEndPoint}.");
                     _ = Server.HandleConnectionAsync(client);
                 }
             }
             catch (Exception ex)
             {
-                Logger.Warn($"Error while listening on {endpoint}: {ex}");
+                Server.Logger.Warn($"Error while listening on {endpoint}: {ex}");
             }
         }
     }

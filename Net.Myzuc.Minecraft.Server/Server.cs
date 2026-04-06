@@ -13,7 +13,7 @@ namespace Net.Myzuc.Minecraft.Server
 {
     public static class Server
     {
-        internal static readonly Logger Logger = LogManager.GetLogger(Assembly.GetExecutingAssembly().GetName().Name ?? string.Empty);
+        public static Logger Logger => LogManager.GetLogger(Assembly.GetCallingAssembly().GetName().Name ?? string.Empty);
         internal static readonly JsonConfiguration<ServerConfiguration> Config = new("Net.Myzuc.Minecraft.Server:Configuration");
         public static event EventHandler OnStart = (sender, args) => { };
         public static event EventHandler OnStop = (sender, args) => { };
