@@ -42,14 +42,8 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     Socket client = await socket.AcceptAsync(cancellationToken);
-                    try
-                    {
-                        _ = Server.HandleConnectionAsync(client);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Warn($"Error while handling connection from {client.RemoteEndPoint} on {endpoint}: {ex}");
-                    }
+                    Logger.Debug($"Registering connection from {endpoint}.");
+                    _ = Server.HandleConnectionAsync(client);
                 }
             }
             catch (Exception ex)
