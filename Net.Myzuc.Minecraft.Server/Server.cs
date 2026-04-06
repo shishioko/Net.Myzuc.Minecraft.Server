@@ -109,7 +109,7 @@ namespace Net.Myzuc.Minecraft.Server
                     }
                     default:
                     {
-                        throw new ProtocolViolationException("Unknown Intent!");
+                        throw new ProtocolViolationException("Unexpected Intent!");
                     }
                 }
             }
