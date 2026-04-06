@@ -18,7 +18,7 @@ namespace Net.Myzuc.Minecraft.Server
         public static event EventHandler OnStart = (sender, args) => { };
         public static event EventHandler OnStop = (sender, args) => { };
         public static event EventHandler<StatusEventArgs> OnStatus = (sender, args) => { };
-        internal static async Task Main(string[] args)
+        internal static async Task Main()
         {
             try
             {
