@@ -12,7 +12,7 @@ namespace Net.Myzuc.Minecraft.Server.Resources
             {
                 await base.LoadAsync(cancellationToken);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 if (!File.Exists(GetPath())) await ResetAsync(cancellationToken);
             }
