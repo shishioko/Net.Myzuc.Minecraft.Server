@@ -42,7 +42,7 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     Socket client = await socket.AcceptAsync(cancellationToken);
-                    Logger.Debug($"Registering connection from {endpoint}.");
+                    Logger.Debug($"Registering connection from {client.RemoteEndPoint}.");
                     _ = Server.HandleConnectionAsync(client);
                 }
             }
