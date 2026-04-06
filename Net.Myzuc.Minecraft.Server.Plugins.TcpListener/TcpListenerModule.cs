@@ -10,7 +10,7 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
     public static class TcpListenerModule
     {
         internal static readonly Logger Logger = LogManager.GetLogger(Assembly.GetExecutingAssembly().GetName().Name ?? string.Empty);
-        private static readonly JsonConfiguration<TcpListenerConfiguration> Config = new("MMEModule.TcpListener.Endpoints");
+        private static readonly JsonConfiguration<TcpListenerConfiguration> Config = new("MMEModule.TcpListener.Configuration");
         [ModuleInitializer]
         private static async Task InitializeAsync()
         {
