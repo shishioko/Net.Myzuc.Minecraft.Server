@@ -1,7 +1,13 @@
 using System.Collections.Concurrent;
 using System.Net;
+using System.Numerics;
+using System.Security.Authentication;
 using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.VisualStudio.Threading;
+using Net.Myzuc.Minecraft.Common.Objects;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login;
@@ -25,6 +31,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         private readonly TaskCompletionSource OnEncrypt = new();
         private ServersideEncryptionUtility? EncryptionUtility = null;
         private readonly TaskCompletionSource OnFinish = new();
+        private string? Name = null;
         
         internal LoginClient(Connection connection, bool isTransfer) : base(connection, ProtocolStage.Login)
         {
@@ -57,7 +64,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         {
             if (!Ongoing || Finishing) throw new InvalidOperationException();
             if (EncryptionUtility is not null) throw new InvalidOperationException();
-            EncryptionUtility = new();
+            EncryptionUtility = new(authenticate, Name!,  serverId);
             await WriteAsync(EncryptionUtility.GenerateRequest());
             await OnEncrypt.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
         }
@@ -98,11 +105,11 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 {
                     if (Ongoing || Finishing) throw new ProtocolViolationException();
                     Ongoing = true;
-                    await OnStart.InvokeAsync(this, new(loginStartPacket.Name, loginStartPacket.Guid));
+                    await OnStart.InvokeAsync(this, new(Name = loginStartPacket.Name, loginStartPacket.Guid));
                     _ = Task.Run(
                         async () =>
                         {
-                            await EncryptAsync( false);
+                            await EncryptAsync( true);
                             
                             await WriteAsync(
                                 new LoginDisconnectPacket()
@@ -122,10 +129,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                         byte[]? secret = EncryptionUtility.HandleResponse(encryptionResponsePacket);
                         if (secret is null) throw new CryptographicException();
                         Connection.Encrypt(secret);
-                        if (Authenticate)
-                        {
-                            throw new NotImplementedException();
-                        }
+                        if (EncryptionUtility.Authenticate) await EncryptionUtility.AuthenticateAsync();
                         OnEncrypt.SetResult();
                     }
                     catch (Exception ex)
