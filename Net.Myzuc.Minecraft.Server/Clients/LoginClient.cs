@@ -168,5 +168,15 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             }
             return null;
         }
+        public override void Dispose()
+        {
+            EncryptionUtility?.Dispose();
+            base.Dispose();
+        }
+        public override ValueTask DisposeAsync()
+        {
+            EncryptionUtility?.Dispose();
+            return base.DisposeAsync();
+        }
     }
 }
