@@ -1,9 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using Net.Myzuc.Minecraft.Server.Objects.Attributes;
 using Net.Myzuc.Minecraft.Server.Resources;
-using NLog;
 
 namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
 {
@@ -14,7 +12,7 @@ namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
         private static async Task InitializeAsync()
         {
             await Config.LoadAsync();
-            Server.OnStart += (sender, args) =>
+            Server.OnStart += async (sender, args) =>
             {
                 try
                 {

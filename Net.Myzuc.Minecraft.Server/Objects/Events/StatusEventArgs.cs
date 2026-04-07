@@ -2,8 +2,12 @@ using Net.Myzuc.Minecraft.Common.Objects;
 
 namespace Net.Myzuc.Minecraft.Server.Objects.Events
 {
-    public class StatusEventArgs
+    public class StatusEventArgs : EventArgs
     {
-        public Status? Status = null;
+        public readonly Status Status;
+        public StatusEventArgs(Status status)
+        {
+            Status = status;
+        }
     }
 }

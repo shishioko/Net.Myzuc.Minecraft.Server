@@ -1,10 +1,9 @@
-﻿using System.Net;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.VisualStudio.Threading;
 using Net.Myzuc.Minecraft.Common.Protocol;
-using Net.Myzuc.Minecraft.Common.Protocol.Packets;
-using Net.Myzuc.Minecraft.Server.Objects.Events;
+using Net.Myzuc.Minecraft.Server.Clients;
 using Net.Myzuc.Minecraft.Server.Extensions;
 using Net.Myzuc.Minecraft.Server.Resources;
 using NLog;
@@ -15,9 +14,8 @@ namespace Net.Myzuc.Minecraft.Server
     {
         public static Logger Logger => LogManager.GetLogger(Assembly.GetCallingAssembly().GetName().Name ?? string.Empty);
         internal static readonly JsonConfiguration<ServerConfiguration> Config = new("Net.Myzuc.Minecraft.Server:Configuration");
-        public static event EventHandler OnStart = (sender, args) => { };
-        public static event EventHandler OnStop = (sender, args) => { };
-        public static event EventHandler<StatusEventArgs> OnStatus = (sender, args) => { };
+        public static event AsyncEventHandler OnStart = (sender, args) => Task.CompletedTask;
+        public static event AsyncEventHandler OnStop = (sender, args) => Task.CompletedTask;
         internal static async Task Main()
         {
             try
@@ -67,22 +65,22 @@ namespace Net.Myzuc.Minecraft.Server
                     )
                 );
                 Logger.Debug("Initialized modules.");
-                OnStart(null, EventArgs.Empty);
+                await OnStart.InvokeAsync(null, EventArgs.Empty);
                 Logger.Info("Started server.");
             }
             catch (Exception ex)
             {
                 Logger.Fatal($"Error while starting Server: {ex}");
-                Stop(false);
+                await StopAsync(false);
             }
             await Task.Delay(-1);
         }
-        public static void Stop(bool success)
+        public static async Task StopAsync(bool success)
         {
             try
             {
-                Logger.Info("Stopping server.");
-                OnStop(null, EventArgs.Empty);
+                Logger.Info("Stopping server...");
+                await OnStop.InvokeAsync(null, EventArgs.Empty);
                 LogManager.Flush();
             }
             catch (Exception ex)
@@ -98,58 +96,19 @@ namespace Net.Myzuc.Minecraft.Server
                 socket.ReceiveTimeout = Config.Value.Timeout;
                 socket.SendTimeout = Config.Value.Timeout;
                 await using Connection connection = new(socket, true);
-                HandshakePacket handshake = await connection.ReadAsync<HandshakePacket>();
-                switch (connection.ProtocolStage)
+                Client? client = new HandshakeClient(connection);
+                try
                 {
-                    case ProtocolStage.Status:
+                    while (client is not null)
                     {
-                        while (true)
-                        {
-                            Packet packet = await connection.ReadAsync();
-                            switch (packet)
-                            {
-                                case StatusRequestPacket statusRequestPacket:
-                                {
-                                    StatusEventArgs args = new()
-                                    {
-                                        Status = null
-                                    };
-                                    OnStatus(connection, args);
-                                    if (args.Status is null) return;
-                                    await connection.WriteAsync(
-                                        new StatusResponsePacket()
-                                        {
-                                            Status = args.Status
-                                        }
-                                    );
-                                    break;
-                                }
-                                case PingRequestPacket pingRequestPacket:
-                                {
-                                    await connection.WriteAsync(
-                                        new PingResponsePacket()
-                                        {
-                                            Data = pingRequestPacket.Data
-                                        }
-                                    );
-                                    break;
-                                }
-                                default:
-                                {
-                                    throw new ProtocolViolationException("Unexpected Packet!");
-                                }
-                            }
-                        }
+                        Client? newClient = await client.ListenAsync();
+                        await client.DisposeAsync();
+                        client = newClient;
                     }
-                    case ProtocolStage.Login:
-                    {
-                        throw new NotImplementedException();
-                        break;
-                    }
-                    default:
-                    {
-                        throw new ProtocolViolationException("Unexpected Intent!");
-                    }
+                }
+                finally
+                {
+                    if (client is not null) await client.DisposeAsync();
                 }
             }
             catch (Exception ex)
