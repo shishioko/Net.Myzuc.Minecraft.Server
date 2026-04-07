@@ -29,7 +29,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         public async Task FinishAsync(CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(Disposed, this);
-            if (!Ongoing || Finishing) throw new ProtocolViolationException();
+            if (!Ongoing || Finishing) throw new InvalidOperationException();
             Finishing = true;
             await WriteAsync(
                 new LoginSuccessPacket()
@@ -41,6 +41,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         }
         public async Task SetCompressionThesholdAsync(int threshold)
         {
+            if (!Ongoing || Finishing) throw new InvalidOperationException();
             await WriteAsync(
                 new LoginCompressionPacket()
                 {
@@ -51,7 +52,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         public async Task<byte[]?> GetCookieAsync(string identifier, CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(Disposed, this);
-            if (!Ongoing || Finishing) throw new ProtocolViolationException();
+            if (!Ongoing || Finishing) throw new InvalidOperationException();
             TaskCompletionSource<byte[]?> result = OnCookie.GetOrAdd(identifier, new TaskCompletionSource<byte[]?>());
             await WriteAsync(
                 new LoginCookieRequestPacket()
@@ -64,7 +65,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         public async Task<byte[]?> SendCustomAsync(string channel, byte[] data, CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(Disposed, this);
-            if (!Ongoing || Finishing) throw new ProtocolViolationException();
+            if (!Ongoing || Finishing) throw new InvalidOperationException();
             int customId = CustomId;
             TaskCompletionSource<byte[]?> response = new();
             while (!OnCustom.TryAdd(customId, response)) customId = CustomId++;
