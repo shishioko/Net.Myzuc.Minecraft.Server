@@ -1,13 +1,7 @@
 using System.Collections.Concurrent;
 using System.Net;
-using System.Numerics;
-using System.Security.Authentication;
 using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.VisualStudio.Threading;
-using Net.Myzuc.Minecraft.Common.Objects;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login;
@@ -106,18 +100,6 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                     if (Ongoing || Finishing) throw new ProtocolViolationException();
                     Ongoing = true;
                     await OnStart.InvokeAsync(this, new(Name = loginStartPacket.Name, loginStartPacket.Guid));
-                    _ = Task.Run(
-                        async () =>
-                        {
-                            await EncryptAsync( true);
-                            
-                            await WriteAsync(
-                                new LoginDisconnectPacket()
-                                {
-                                    Message = "goober"
-                                }
-                            );
-                        });
                     break;
                 }
                 case EncryptionResponsePacket encryptionResponsePacket:
