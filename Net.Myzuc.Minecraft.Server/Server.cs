@@ -1,10 +1,14 @@
-﻿using System.Net.Sockets;
+﻿using System.Drawing;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.VisualStudio.Threading;
+using Net.Myzuc.Minecraft.Common.ChatComponents;
+using Net.Myzuc.Minecraft.Common.Data;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Server.Clients;
 using Net.Myzuc.Minecraft.Server.Extensions;
+using Net.Myzuc.Minecraft.Server.Objects.Events;
 using Net.Myzuc.Minecraft.Server.Resources;
 using NLog;
 
@@ -16,6 +20,7 @@ namespace Net.Myzuc.Minecraft.Server
         internal static readonly JsonConfiguration<ServerConfiguration> Config = new("Net.Myzuc.Minecraft.Server:Configuration");
         public static event AsyncEventHandler OnStart = (sender, args) => Task.CompletedTask;
         public static event AsyncEventHandler OnStop = (sender, args) => Task.CompletedTask;
+        public static event AsyncEventHandler<ConnectedEventArgs> OnConnected = (sender, args) => Task.CompletedTask;
         internal static async Task Main()
         {
             try
@@ -65,6 +70,52 @@ namespace Net.Myzuc.Minecraft.Server
                     )
                 );
                 Logger.Debug("Initialized modules.");
+
+
+                OnConnected += async (sender, args) =>
+                {
+                    args.Client.OnProtocolStageChange += async (sender, args) =>
+                    {
+                        if (args.Client is LoginClient loginClient)
+                        {
+                            loginClient.OnStart += async (sender, args) =>
+                            {
+                                _ = Task.Run(
+                                    async () =>
+                                    {
+                                        await loginClient.SetCompressionThesholdAsync(64);
+                                        GameProfile? profile = await loginClient.EncryptAsync(true);
+                                        profile ??= new(Guid.Empty, "Unknown");
+                                        ChatComponent chat = new TextChatComponent($"{profile.Name} ist gebannt trust trust")
+                                        {
+                                            Color = Color.MidnightBlue,
+                                            ShadowColor = Color.CornflowerBlue,
+                                            Italic = true,
+                                            Children = [
+                                                new TextChatComponent(" ["),
+                                                new PlayerObjectChatComponent(new RenderProfile(profile))
+                                                {
+                                                    Color = Color.White,
+                                                    ShadowColor = Color.Transparent,
+                                                },
+                                                new TextChatComponent("], ["),
+                                                new PlayerObjectChatComponent(new RenderProfile("simon_dersimon"))
+                                                {
+                                                    Color = Color.White,
+                                                    ShadowColor = Color.Transparent,
+                                                },
+                                                new TextChatComponent("]")
+                                            ]
+                                        };
+                                        await loginClient.DisconnectAsync(chat);
+                                    }
+                                );
+                            };
+                        }
+                    };
+                };
+                
+                
                 await OnStart.InvokeAsync(null, EventArgs.Empty);
                 Logger.Info("Started server.");
             }
@@ -97,6 +148,7 @@ namespace Net.Myzuc.Minecraft.Server
                 socket.SendTimeout = Config.Value.Timeout;
                 await using Connection connection = new(socket, true);
                 Client? client = new HandshakeClient(connection);
+                await OnConnected.InvokeAsync<ConnectedEventArgs>(null, new((client as HandshakeClient)!));
                 try
                 {
                     while (client is not null)

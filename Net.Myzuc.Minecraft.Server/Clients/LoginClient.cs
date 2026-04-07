@@ -2,6 +2,8 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Security.Cryptography;
 using Microsoft.VisualStudio.Threading;
+using Net.Myzuc.Minecraft.Common.ChatComponents;
+using Net.Myzuc.Minecraft.Common.Data;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login;
@@ -22,7 +24,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         private readonly ConcurrentDictionary<string, TaskCompletionSource<byte[]?>> OnCookie = [];
         private readonly ConcurrentDictionary<int, TaskCompletionSource<byte[]?>> OnCustom = [];
         private int CustomId = 0;
-        private readonly TaskCompletionSource OnEncrypt = new();
+        private readonly TaskCompletionSource<GameProfile?> OnEncrypt = new();
         private ServersideEncryptionUtility? EncryptionUtility = null;
         private readonly TaskCompletionSource OnFinish = new();
         private string? Name = null;
@@ -31,7 +33,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         {
             IsTransfer = isTransfer;
         }
-        public async Task FinishAsync(CancellationToken cancellationToken = default)
+        public async Task FinishAsync(GameProfile profile, CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(Disposed, this);
             if (!Ongoing || Finishing) throw new InvalidOperationException();
@@ -39,7 +41,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             await WriteAsync(
                 new LoginSuccessPacket()
                 {
-                    Profile = new(Guid.NewGuid(), "player")
+                    Profile = profile
                 }
             );
             await OnFinish.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
@@ -54,13 +56,13 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 }
             );
         }
-        public async Task EncryptAsync(bool authenticate, string serverId = "", CancellationToken cancellationToken = default)
+        public async Task<GameProfile?> EncryptAsync(bool authenticate, string serverId = "", CancellationToken cancellationToken = default)
         {
             if (!Ongoing || Finishing) throw new InvalidOperationException();
             if (EncryptionUtility is not null) throw new InvalidOperationException();
             EncryptionUtility = new(authenticate, Name!,  serverId);
             await WriteAsync(EncryptionUtility.GenerateRequest());
-            await OnEncrypt.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
+            return await OnEncrypt.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
         }
         public async Task<byte[]?> GetCookieAsync(string identifier, CancellationToken cancellationToken = default)
         {
@@ -91,6 +93,13 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             );
             return await response.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
         }
+        public async Task DisconnectAsync(ChatComponent message)
+        {
+            await WriteAsync(new LoginDisconnectPacket()
+            {
+                Message = message
+            });
+        }
         internal override async Task<Client?> HandlePacketAsync(Packet packet)
         {
             switch (packet)
@@ -111,8 +120,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                         byte[]? secret = EncryptionUtility.HandleResponse(encryptionResponsePacket);
                         if (secret is null) throw new CryptographicException();
                         Connection.Encrypt(secret);
-                        if (EncryptionUtility.Authenticate) await EncryptionUtility.AuthenticateAsync();
-                        OnEncrypt.SetResult();
+                        OnEncrypt.SetResult(EncryptionUtility.Authenticate ? await EncryptionUtility.AuthenticateAsync() : null);
                     }
                     catch (Exception ex)
                     {

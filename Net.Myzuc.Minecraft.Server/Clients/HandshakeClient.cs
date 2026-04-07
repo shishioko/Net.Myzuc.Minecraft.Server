@@ -1,4 +1,5 @@
 using System.Net;
+using Net.Myzuc.Minecraft.Common.Data;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets.Handshake;
@@ -19,7 +20,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 {
                     switch (handshakePacket.Intent)
                     {
-                        case HandshakePacket.IntentEnum.Status:
+                        case HandshakeIntent.Status:
                         {
                             return new StatusClient(Connection)
                             {
@@ -27,10 +28,10 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                                 Origin = (handshakePacket.Address, handshakePacket.Port),
                             };
                         }
-                        case HandshakePacket.IntentEnum.Login:
-                        case HandshakePacket.IntentEnum.Transfer:
+                        case HandshakeIntent.Login:
+                        case HandshakeIntent.Transfer:
                         {
-                            return new LoginClient(Connection, handshakePacket.Intent == HandshakePacket.IntentEnum.Transfer)
+                            return new LoginClient(Connection, handshakePacket.Intent == HandshakeIntent.Transfer)
                             {
                                 ProtocolVersion = handshakePacket.ProtocolVersion,
                                 Origin = (handshakePacket.Address, handshakePacket.Port),
