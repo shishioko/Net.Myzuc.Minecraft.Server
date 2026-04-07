@@ -1,6 +1,6 @@
 namespace Net.Myzuc.Minecraft.Server.Objects.Events
 {
-    public class LoginStartEventArgs : EventArgs
+    public sealed class LoginStartEventArgs : EventArgs
     {
         public readonly string Name;
         public readonly Guid Guid;
