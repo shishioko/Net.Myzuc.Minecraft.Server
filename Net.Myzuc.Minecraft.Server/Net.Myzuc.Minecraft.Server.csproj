@@ -9,11 +9,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Me.Shiokawaii.IO" Version="1.0.4" />
+      <PackageReference Include="Me.Shiokawaii.IO" Version="1.0.5" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="11.0.0-preview.2.26159.112" />
       <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />
       <PackageReference Include="MongoDB.Bson" Version="3.7.1" />
-      <PackageReference Include="Net.Myzuc.Minecraft.Common" Version="1.0.3.1" />
+      <PackageReference Include="Net.Myzuc.Minecraft.Common" Version="0.0.5-alpha" />
       <PackageReference Include="NLog" Version="6.1.2" />
     </ItemGroup>
 
