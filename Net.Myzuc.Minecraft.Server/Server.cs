@@ -1,7 +1,10 @@
-﻿using System.Drawing;
+﻿using System.Data;
+using System.Drawing;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.VisualStudio.Threading;
 using Net.Myzuc.Minecraft.Common.ChatComponents;
 using Net.Myzuc.Minecraft.Common.Data;
@@ -107,7 +110,13 @@ namespace Net.Myzuc.Minecraft.Server
                                                 new TextChatComponent("]")
                                             ]
                                         };
-                                        await loginClient.DisconnectAsync(chat);
+                                        JsonSerializerOptions so = new()
+                                        {
+                                            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                                        };
+                                        string chatjson = JsonSerializer.Serialize(chat, so);
+                                        ChatComponent chat2 = JsonSerializer.Deserialize<ChatComponent>(chatjson, so) ?? throw new NoNullAllowedException();
+                                        await loginClient.DisconnectAsync(chat2);
                                     }
                                 );
                             };
