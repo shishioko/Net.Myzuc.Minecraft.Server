@@ -1,9 +1,11 @@
 using System.Collections.Concurrent;
 using System.Net;
+using System.Security.Cryptography;
 using Microsoft.VisualStudio.Threading;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login;
+using Net.Myzuc.Minecraft.Common.Utilities;
 using Net.Myzuc.Minecraft.Server.Objects.Events;
 
 namespace Net.Myzuc.Minecraft.Server.Clients
@@ -20,6 +22,8 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         private readonly ConcurrentDictionary<string, TaskCompletionSource<byte[]?>> OnCookie = [];
         private readonly ConcurrentDictionary<int, TaskCompletionSource<byte[]?>> OnCustom = [];
         private int CustomId = 0;
+        private readonly TaskCompletionSource OnEncrypt = new();
+        private ServersideEncryptionUtility? EncryptionUtility = null;
         private readonly TaskCompletionSource OnFinish = new();
         
         internal LoginClient(Connection connection, bool isTransfer) : base(connection, ProtocolStage.Login)
@@ -48,6 +52,14 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                     Threshold = threshold
                 }
             );
+        }
+        public async Task EncryptAsync(bool authenticate, string serverId = "", CancellationToken cancellationToken = default)
+        {
+            if (!Ongoing || Finishing) throw new InvalidOperationException();
+            if (EncryptionUtility is not null) throw new InvalidOperationException();
+            EncryptionUtility = new();
+            await WriteAsync(EncryptionUtility.GenerateRequest());
+            await OnEncrypt.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
         }
         public async Task<byte[]?> GetCookieAsync(string identifier, CancellationToken cancellationToken = default)
         {
@@ -90,8 +102,8 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                     _ = Task.Run(
                         async () =>
                         {
-                            await SetCompressionThesholdAsync(1);
-                            byte[]? data = await GetCookieAsync("the_cookie");
+                            await EncryptAsync( false);
+                            
                             await WriteAsync(
                                 new LoginDisconnectPacket()
                                 {
@@ -99,6 +111,28 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                                 }
                             );
                         });
+                    break;
+                }
+                case EncryptionResponsePacket encryptionResponsePacket:
+                {
+                    if (!Ongoing) throw new ProtocolViolationException();
+                    if (EncryptionUtility is null) throw new ProtocolViolationException();
+                    try
+                    {
+                        byte[]? secret = EncryptionUtility.HandleResponse(encryptionResponsePacket);
+                        if (secret is null) throw new CryptographicException();
+                        Connection.Encrypt(secret);
+                        if (Authenticate)
+                        {
+                            throw new NotImplementedException();
+                        }
+                        OnEncrypt.SetResult();
+                    }
+                    catch (Exception ex)
+                    {
+                        OnEncrypt.SetException(ex);
+                        throw;
+                    }
                     break;
                 }
                 case LoginCookieResponsePacket loginCookieResponsePacket:
