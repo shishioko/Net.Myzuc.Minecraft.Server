@@ -24,7 +24,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         private readonly ConcurrentDictionary<string, TaskCompletionSource<byte[]?>> OnCookie = [];
         private readonly ConcurrentDictionary<int, TaskCompletionSource<byte[]?>> OnCustom = [];
         private int CustomId = 0;
-        private readonly TaskCompletionSource<GameProfile?> OnEncrypt = new();
+        private readonly TaskCompletionSource<ResolvedProfile?> OnEncrypt = new();
         private ServersideEncryptionUtility? EncryptionUtility = null;
         private readonly TaskCompletionSource OnFinish = new();
         private string? Name = null;
@@ -33,7 +33,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         {
             IsTransfer = isTransfer;
         }
-        public async Task FinishAsync(GameProfile profile, CancellationToken cancellationToken = default)
+        public async Task FinishAsync(ResolvedProfile profile, CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(Disposed, this);
             if (!Ongoing || Finishing) throw new InvalidOperationException();
@@ -56,7 +56,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 }
             );
         }
-        public async Task<GameProfile?> EncryptAsync(bool authenticate, string serverId = "", CancellationToken cancellationToken = default)
+        public async Task<ResolvedProfile?> EncryptAsync(bool authenticate, string serverId = "", CancellationToken cancellationToken = default)
         {
             if (!Ongoing || Finishing) throw new InvalidOperationException();
             if (EncryptionUtility is not null) throw new InvalidOperationException();
