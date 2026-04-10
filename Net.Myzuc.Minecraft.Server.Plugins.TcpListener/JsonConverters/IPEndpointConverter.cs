@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Net.Myzuc.Minecraft.Server.Objects.JsonConverters
+namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener.JsonConverters
 {
     public class IPEndPointConverter : JsonConverter<IPEndPoint>
     {

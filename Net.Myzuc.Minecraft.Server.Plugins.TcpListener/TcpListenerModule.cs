@@ -1,13 +1,25 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 using Net.Myzuc.Minecraft.Server.Objects.Attributes;
+using Net.Myzuc.Minecraft.Server.Plugins.TcpListener.JsonConverters;
 using Net.Myzuc.Minecraft.Server.Resources;
 
 namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener
 {
     public static class TcpListenerModule
     {
-        private static readonly JsonConfiguration<TcpListenerConfiguration> Config = new("Net.Myzuc.Minecraft.Server.Plugins.TcpListener:Configuration");
+        private static readonly JsonConfiguration<TcpListenerConfiguration> Config = 
+            new("Net.Myzuc.Minecraft.Server.Plugins.TcpListener:Configuration", 
+                new JsonSerializerOptions(JsonConfiguration<TcpListenerConfiguration>.DefaulttJsonSerializerOptions)
+                {
+                    Converters =
+                    {
+                        new IPEndPointConverter()
+                    }
+                }
+            );
+        // ReSharper disable UnusedMember.Local
         [PluginInitializer]
         private static async Task InitializeAsync()
         {
