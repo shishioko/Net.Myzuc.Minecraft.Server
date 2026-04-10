@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.Threading;
 using Net.Myzuc.Minecraft.Common.ChatComponents;
 using Net.Myzuc.Minecraft.Common.Data;
 using Net.Myzuc.Minecraft.Common.Data.Primitives;
+using Net.Myzuc.Minecraft.Common.Data.Structs;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login;
@@ -39,12 +40,10 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             ObjectDisposedException.ThrowIf(Disposed, this);
             if (!Ongoing || Finishing) throw new InvalidOperationException();
             Finishing = true;
-            await WriteAsync(
-                new LoginSuccessPacket()
-                {
-                    Profile = profile
-                }
-            );
+            await WriteAsync(new LoginSuccessPacket()
+            {
+                Profile = profile
+            });
             await OnFinish.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
         }
         public async Task SetCompressionThesholdAsync(int threshold)
@@ -136,7 +135,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 case LoginCookieResponsePacket loginCookieResponsePacket:
                 {
                     if (!Ongoing) throw new ProtocolViolationException();
-                    OnCookie.TryGetValue(loginCookieResponsePacket.Id, out TaskCompletionSource<byte[]?>? result);
+                    OnCookie.TryRemove(loginCookieResponsePacket.Id, out TaskCompletionSource<byte[]?>? result);
                     if (result is null) throw new ProtocolViolationException();
                     result.TrySetResult(loginCookieResponsePacket.Data);
                     break;
