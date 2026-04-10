@@ -4,8 +4,8 @@ namespace Net.Myzuc.Minecraft.Server.Objects.Events
 {
     public sealed class LoginStartEventArgs : EventArgs
     {
-        public readonly ResolvedProfile Profile = new();
-        public LoginStartEventArgs(ResolvedProfile profile)
+        public ResolvedProfile Profile { get; }
+        internal LoginStartEventArgs(ResolvedProfile profile)
         {
             Profile = profile;
         }

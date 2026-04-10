@@ -4,8 +4,8 @@ namespace Net.Myzuc.Minecraft.Server.Objects.Events
 {
     public sealed class StatusEventArgs : EventArgs
     {
-        public readonly Status Status;
-        public StatusEventArgs(Status status)
+        public Status Status { get; }
+        internal StatusEventArgs(Status status)
         {
             Status = status;
         }

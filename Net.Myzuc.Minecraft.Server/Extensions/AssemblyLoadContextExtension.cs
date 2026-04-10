@@ -3,7 +3,7 @@ using System.Runtime.Loader;
 
 namespace Net.Myzuc.Minecraft.Server.Extensions
 {
-    public static class AssemblyLoadContextExtensions
+    internal static class AssemblyLoadContextExtensions
     {
         public static async Task<Assembly> LoadFromAssemblyPathAsync(this AssemblyLoadContext context, string assemblyPath, CancellationToken cancellationToken = default)
         {

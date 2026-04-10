@@ -4,8 +4,8 @@ namespace Net.Myzuc.Minecraft.Server.Objects.Events
 {
     public sealed class ProtocolStageChangeEventArgs : EventArgs
     {
-        public readonly Client? Client;
-        public ProtocolStageChangeEventArgs(Client? client)
+        public Client? Client { get; }
+        internal ProtocolStageChangeEventArgs(Client? client)
         {
             Client = client;
         }
