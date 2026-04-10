@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using Microsoft.VisualStudio.Threading;
 using Net.Myzuc.Minecraft.Common.ChatComponents;
 using Net.Myzuc.Minecraft.Common.Data;
+using Net.Myzuc.Minecraft.Common.Data.Primitives;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login;
@@ -21,7 +22,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         
         private bool Ongoing = false;
         private bool Finishing = false;
-        private readonly ConcurrentDictionary<string, TaskCompletionSource<byte[]?>> OnCookie = [];
+        private readonly ConcurrentDictionary<Identifier, TaskCompletionSource<byte[]?>> OnCookie = [];
         private readonly ConcurrentDictionary<int, TaskCompletionSource<byte[]?>> OnCustom = [];
         private int CustomId = 0;
         private readonly TaskCompletionSource OnEncrypt = new();
@@ -65,7 +66,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             await OnEncrypt.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
             return Profile;
         }
-        public async Task<byte[]?> GetCookieAsync(string identifier, CancellationToken cancellationToken = default)
+        public async Task<byte[]?> GetCookieAsync(Identifier identifier, CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(Disposed, this);
             if (!Ongoing || Finishing) throw new InvalidOperationException();
@@ -109,7 +110,8 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 {
                     if (Ongoing || Finishing) throw new ProtocolViolationException();
                     Ongoing = true;
-                    await OnStart.InvokeAsync(this, new(new(loginStartPacket.Guid, loginStartPacket.Name)));
+                    Profile = new(loginStartPacket.Guid, loginStartPacket.Name);
+                    await OnStart.InvokeAsync(this, new(Profile));
                     break;
                 }
                 case EncryptionResponsePacket encryptionResponsePacket:
@@ -134,10 +136,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 case LoginCookieResponsePacket loginCookieResponsePacket:
                 {
                     if (!Ongoing) throw new ProtocolViolationException();
-                    if (!OnCookie.TryGetValue(loginCookieResponsePacket.Id, out TaskCompletionSource<byte[]?>? result) && loginCookieResponsePacket.Id.StartsWith("minecraft:"))
-                    {
-                        OnCookie.TryGetValue(loginCookieResponsePacket.Id["minecraft:".Length..], out result);
-                    }
+                    OnCookie.TryGetValue(loginCookieResponsePacket.Id, out TaskCompletionSource<byte[]?>? result);
                     if (result is null) throw new ProtocolViolationException();
                     result.TrySetResult(loginCookieResponsePacket.Data);
                     break;
