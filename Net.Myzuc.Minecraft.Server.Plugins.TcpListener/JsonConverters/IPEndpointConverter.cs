@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Net.Myzuc.Minecraft.Server.Plugins.TcpListener.JsonConverters
 {
-    public class IPEndPointConverter : JsonConverter<IPEndPoint>
+    internal class IPEndPointConverter : JsonConverter<IPEndPoint>
     {
         public override IPEndPoint? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
