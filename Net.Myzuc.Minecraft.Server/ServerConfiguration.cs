@@ -1,7 +1,7 @@
 namespace Net.Myzuc.Minecraft.Server
 {
-    public record ServerConfiguration
+    public sealed record ServerConfiguration
     {
-        public int Timeout = 30000;
+        public int Timeout { get; init; } = 30000;
     }
 }
