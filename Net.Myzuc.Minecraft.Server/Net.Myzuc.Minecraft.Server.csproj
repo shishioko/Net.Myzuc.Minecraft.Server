@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.4.2" />
       <PackageReference Include="Me.Shiokawaii.IO" Version="1.0.5" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="11.0.0-preview.2.26159.112" />
       <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />

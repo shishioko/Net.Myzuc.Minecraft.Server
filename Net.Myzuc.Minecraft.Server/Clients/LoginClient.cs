@@ -23,8 +23,8 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         
         private bool Ongoing = false;
         private bool Finishing = false;
-        private readonly ConcurrentDictionary<Identifier, TaskCompletionSource<byte[]?>> OnCookie = [];
-        private readonly ConcurrentDictionary<int, TaskCompletionSource<byte[]?>> OnCustom = [];
+        private readonly ConcurrentDictionary<Identifier, TaskCompletionSource<Memory<byte>?>> OnCookie = [];
+        private readonly ConcurrentDictionary<int, TaskCompletionSource<Memory<byte>?>> OnCustom = [];
         private int CustomId = 0;
         private readonly TaskCompletionSource OnEncrypt = new();
         private ServersideEncryptionUtility? EncryptionUtility = null;
@@ -65,11 +65,11 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             await OnEncrypt.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
             return Profile;
         }
-        public async Task<byte[]?> GetCookieAsync(Identifier identifier, CancellationToken cancellationToken = default)
+        public async Task<Memory<byte>?> GetCookieAsync(Identifier identifier, CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(Disposed, this);
             if (!Ongoing || Finishing) throw new InvalidOperationException();
-            TaskCompletionSource<byte[]?> result = OnCookie.GetOrAdd(identifier, new TaskCompletionSource<byte[]?>());
+            TaskCompletionSource<Memory<byte>?> result = OnCookie.GetOrAdd(identifier, new TaskCompletionSource<Memory<byte>?>());
             await WriteAsync(
                 new LoginCookieRequestPacket()
                 {
@@ -78,12 +78,12 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             );
             return await result.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
         }
-        public async Task<byte[]?> SendCustomAsync(string channel, byte[] data, CancellationToken cancellationToken = default)
+        public async Task<Memory<byte>?> SendCustomAsync(string channel, Memory<byte> data, CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(Disposed, this);
             if (!Ongoing || Finishing) throw new InvalidOperationException();
             int customId = CustomId;
-            TaskCompletionSource<byte[]?> response = new();
+            TaskCompletionSource<Memory<byte>?> response = new();
             while (!OnCustom.TryAdd(customId, response)) customId = CustomId++;
             await WriteAsync(
                 new LoginCustomRequestPacket()
@@ -135,7 +135,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 case LoginCookieResponsePacket loginCookieResponsePacket:
                 {
                     if (!Ongoing) throw new ProtocolViolationException();
-                    OnCookie.TryRemove(loginCookieResponsePacket.Id, out TaskCompletionSource<byte[]?>? result);
+                    OnCookie.TryRemove(loginCookieResponsePacket.Id, out TaskCompletionSource<Memory<byte>?>? result);
                     if (result is null) throw new ProtocolViolationException();
                     result.TrySetResult(loginCookieResponsePacket.Data);
                     break;
@@ -143,7 +143,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 case LoginCustomResponsePacket loginCustomResponsePacket:
                 {
                     if (!Ongoing) throw new ProtocolViolationException();
-                    if (!OnCustom.TryRemove(loginCustomResponsePacket.Id, out TaskCompletionSource<byte[]?>? response)) throw new ProtocolViolationException();
+                    if (!OnCustom.TryRemove(loginCustomResponsePacket.Id, out TaskCompletionSource<Memory<byte>?>? response)) throw new ProtocolViolationException();
                     response.SetResult(loginCustomResponsePacket.Data);
                     break;
                 }
