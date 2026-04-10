@@ -24,10 +24,10 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         private readonly ConcurrentDictionary<string, TaskCompletionSource<byte[]?>> OnCookie = [];
         private readonly ConcurrentDictionary<int, TaskCompletionSource<byte[]?>> OnCustom = [];
         private int CustomId = 0;
-        private readonly TaskCompletionSource<ResolvedProfile?> OnEncrypt = new();
+        private readonly TaskCompletionSource OnEncrypt = new();
         private ServersideEncryptionUtility? EncryptionUtility = null;
         private readonly TaskCompletionSource OnFinish = new();
-        private string? Name = null;
+        private ResolvedProfile Profile = new();
         
         internal LoginClient(Connection connection, bool isTransfer) : base(connection, ProtocolStage.Login)
         {
@@ -56,13 +56,14 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 }
             );
         }
-        public async Task<ResolvedProfile?> EncryptAsync(bool authenticate, string serverId = "", CancellationToken cancellationToken = default)
+        public async Task<ResolvedProfile> EncryptAsync(bool authenticate, string serverId = "", CancellationToken cancellationToken = default)
         {
             if (!Ongoing || Finishing) throw new InvalidOperationException();
             if (EncryptionUtility is not null) throw new InvalidOperationException();
-            EncryptionUtility = new(authenticate, Name!,  serverId);
+            EncryptionUtility = new(authenticate, Profile.Name,  serverId);
             await WriteAsync(EncryptionUtility.GenerateRequest());
-            return await OnEncrypt.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
+            await OnEncrypt.Task.WaitAsync(cancellationToken.CombineWith(CancellationToken).Token);
+            return Profile;
         }
         public async Task<byte[]?> GetCookieAsync(string identifier, CancellationToken cancellationToken = default)
         {
@@ -108,7 +109,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 {
                     if (Ongoing || Finishing) throw new ProtocolViolationException();
                     Ongoing = true;
-                    await OnStart.InvokeAsync(this, new(Name = loginStartPacket.Name, loginStartPacket.Guid));
+                    await OnStart.InvokeAsync(this, new(new(loginStartPacket.Guid, loginStartPacket.Name)));
                     break;
                 }
                 case EncryptionResponsePacket encryptionResponsePacket:
@@ -120,7 +121,8 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                         byte[]? secret = EncryptionUtility.HandleResponse(encryptionResponsePacket);
                         if (secret is null) throw new CryptographicException();
                         Connection.Encrypt(secret);
-                        OnEncrypt.SetResult(EncryptionUtility.Authenticate ? await EncryptionUtility.AuthenticateAsync() : null);
+                        if (EncryptionUtility.Authenticate) Profile = await EncryptionUtility.AuthenticateAsync();
+                        OnEncrypt.SetResult();
                     }
                     catch (Exception ex)
                     {
@@ -152,8 +154,8 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                     if (!Ongoing || !Finishing) throw new ProtocolViolationException();
                     Ongoing = false;
                     OnFinish.SetResult();
-                    throw new NotImplementedException();
-                    //break;
+                    return new ConfigurationClient(Connection);
+                    break;
                 }
                 default:
                 {

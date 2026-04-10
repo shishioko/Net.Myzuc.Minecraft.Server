@@ -1,13 +1,13 @@
+using Net.Myzuc.Minecraft.Common.Data;
+
 namespace Net.Myzuc.Minecraft.Server.Objects.Events
 {
     public sealed class LoginStartEventArgs : EventArgs
     {
-        public readonly string Name;
-        public readonly Guid Guid;
-        public LoginStartEventArgs(string name, Guid guid)
+        public readonly ResolvedProfile Profile = new();
+        public LoginStartEventArgs(ResolvedProfile profile)
         {
-            Name = name;
-            Guid = guid;
+            Profile = profile;
         }
     }
 }
