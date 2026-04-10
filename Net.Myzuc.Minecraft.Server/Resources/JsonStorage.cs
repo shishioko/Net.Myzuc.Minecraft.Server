@@ -1,39 +1,32 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Net.Myzuc.Minecraft.Server.Objects.JsonConverters;
 
 namespace Net.Myzuc.Minecraft.Server.Resources
 {
     public sealed class JsonStorage<T> : Storage<T> where T : class, new()
     {
+        public static JsonSerializerOptions DefaulttJsonSerializerOptions => new(JsonSerializerDefaults.Strict)
+        {
+
+            PreferredObjectCreationHandling = JsonObjectCreationHandling.Replace,
+
+            NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
+
+            IgnoreReadOnlyProperties = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+            PropertyNameCaseInsensitive = false,
+            AllowTrailingCommas = false,
+            ReadCommentHandling = JsonCommentHandling.Disallow,
+            UnknownTypeHandling = JsonUnknownTypeHandling.JsonElement,
+
+            WriteIndented = false,
+            UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip,
+        };
         private JsonSerializerOptions JsonSerializerOptions { get; }
         public JsonStorage(string identifier, JsonSerializerOptions? jsonSerializerOptions = null) : base(identifier)
         {
-            JsonSerializerOptions = new(jsonSerializerOptions ?? new(JsonSerializerDefaults.General))
-            {
-               
-                Converters =
-                {
-                    new IPEndPointConverter()
-                },
-                PreferredObjectCreationHandling = JsonObjectCreationHandling.Replace,
-            
-                NumberHandling =  JsonNumberHandling.AllowReadingFromString |  JsonNumberHandling.AllowNamedFloatingPointLiterals,
-            
-                IncludeFields = true,
-                IgnoreReadOnlyFields = false,
-                IgnoreReadOnlyProperties = false,
-                DefaultIgnoreCondition = JsonIgnoreCondition.Never,
-                PropertyNameCaseInsensitive = false,
-                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-                AllowTrailingCommas = true,
-                ReadCommentHandling = JsonCommentHandling.Disallow,
-                UnknownTypeHandling =  JsonUnknownTypeHandling.JsonElement,
-            
-                WriteIndented = false,
-                UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip,
-            };
+            JsonSerializerOptions = jsonSerializerOptions ?? DefaulttJsonSerializerOptions;
         }
         public override T Deserialize(byte[] data)
         {
