@@ -1,4 +1,4 @@
-using Net.Myzuc.Minecraft.Common.Data.Structs;
+using Net.Myzuc.Minecraft.Common.Objects;
 
 namespace Net.Myzuc.Minecraft.Server.Objects.Events
 {

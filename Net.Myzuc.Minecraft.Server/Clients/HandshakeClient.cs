@@ -1,8 +1,8 @@
 using System.Net;
-using Net.Myzuc.Minecraft.Common.Data.Enums;
+using Net.Myzuc.Minecraft.Common.Enums;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
-using Net.Myzuc.Minecraft.Common.Protocol.Packets.Handshake;
+using Net.Myzuc.Minecraft.Common.Protocol.Packets.Handshake.Serverbound;
 
 namespace Net.Myzuc.Minecraft.Server.Clients
 {

@@ -2,13 +2,14 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Security.Cryptography;
 using Microsoft.VisualStudio.Threading;
-using Net.Myzuc.Minecraft.Common.ChatComponents;
-using Net.Myzuc.Minecraft.Common.Data;
-using Net.Myzuc.Minecraft.Common.Data.Primitives;
-using Net.Myzuc.Minecraft.Common.Data.Structs;
+using Net.Myzuc.Minecraft.Common.Objects;
+using Net.Myzuc.Minecraft.Common.Objects.ChatComponents;
+using Net.Myzuc.Minecraft.Common.Primitives;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login;
+using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login.Clientbound;
+using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login.Serverbound;
 using Net.Myzuc.Minecraft.Common.Utilities;
 using Net.Myzuc.Minecraft.Server.Objects.Events;
 
@@ -40,7 +41,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             ObjectDisposedException.ThrowIf(Disposed, this);
             if (!Ongoing || Finishing) throw new InvalidOperationException();
             Finishing = true;
-            await WriteAsync(new LoginSuccessPacket()
+            await WriteAsync(new SuccessPacket()
             {
                 Profile = profile
             });
@@ -50,7 +51,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         {
             if (!Ongoing || Finishing) throw new InvalidOperationException();
             await WriteAsync(
-                new LoginCompressionPacket()
+                new CompressionPacket()
                 {
                     Threshold = threshold
                 }
@@ -71,7 +72,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             if (!Ongoing || Finishing) throw new InvalidOperationException();
             TaskCompletionSource<Memory<byte>?> result = OnCookie.GetOrAdd(identifier, new TaskCompletionSource<Memory<byte>?>());
             await WriteAsync(
-                new LoginCookieRequestPacket()
+                new CookieRequestPacket()
                 {
                     Id = identifier
                 }
@@ -86,7 +87,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             TaskCompletionSource<Memory<byte>?> response = new();
             while (!OnCustom.TryAdd(customId, response)) customId = CustomId++;
             await WriteAsync(
-                new LoginCustomRequestPacket()
+                new CustomRequestPacket()
                 {
                     Id = customId,
                     Data = data,
@@ -96,7 +97,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         }
         public async Task DisconnectAsync(ChatComponent message)
         {
-            await WriteAsync(new LoginDisconnectPacket()
+            await WriteAsync(new DisconnectPacket()
             {
                 Message = message
             });
@@ -105,7 +106,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         {
             switch (packet)
             {
-                case LoginStartPacket loginStartPacket:
+                case StartPacket loginStartPacket:
                 {
                     if (Ongoing || Finishing) throw new ProtocolViolationException();
                     Ongoing = true;
@@ -132,7 +133,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                     }
                     break;
                 }
-                case LoginCookieResponsePacket loginCookieResponsePacket:
+                case CookieResponsePacket loginCookieResponsePacket:
                 {
                     if (!Ongoing) throw new ProtocolViolationException();
                     OnCookie.TryRemove(loginCookieResponsePacket.Id, out TaskCompletionSource<Memory<byte>?>? result);
@@ -140,14 +141,14 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                     result.TrySetResult(loginCookieResponsePacket.Data);
                     break;
                 }
-                case LoginCustomResponsePacket loginCustomResponsePacket:
+                case CustomResponsePacket loginCustomResponsePacket:
                 {
                     if (!Ongoing) throw new ProtocolViolationException();
                     if (!OnCustom.TryRemove(loginCustomResponsePacket.Id, out TaskCompletionSource<Memory<byte>?>? response)) throw new ProtocolViolationException();
                     response.SetResult(loginCustomResponsePacket.Data);
                     break;
                 }
-                case LoginEndPacket:
+                case EndPacket:
                 {
                     if (!Ongoing || !Finishing) throw new ProtocolViolationException();
                     Ongoing = false;

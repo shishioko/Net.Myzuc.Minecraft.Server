@@ -3,7 +3,8 @@ using System.Reflection;
 using Microsoft.VisualStudio.Threading;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
-using Net.Myzuc.Minecraft.Common.Protocol.Packets.Status;
+using Net.Myzuc.Minecraft.Common.Protocol.Packets.Status.Clientbound;
+using Net.Myzuc.Minecraft.Common.Protocol.Packets.Status.Serverbound;
 using Net.Myzuc.Minecraft.Server.Objects.Events;
 using Net.Myzuc.Minecraft.Server.Extensions;
 
