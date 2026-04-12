@@ -7,7 +7,6 @@ using Net.Myzuc.Minecraft.Common.Objects.ChatComponents;
 using Net.Myzuc.Minecraft.Common.Primitives;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
-using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login.Clientbound;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets.Login.Serverbound;
 using Net.Myzuc.Minecraft.Common.Utilities;
@@ -106,11 +105,11 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         {
             switch (packet)
             {
-                case StartPacket loginStartPacket:
+                case StartPacket startPacket:
                 {
                     if (Ongoing || Finishing) throw new ProtocolViolationException();
                     Ongoing = true;
-                    Profile = new(loginStartPacket.Guid, loginStartPacket.Name);
+                    Profile = new(startPacket.Guid, startPacket.Name);
                     await OnStart.InvokeAsync(this, new(Profile));
                     break;
                 }
@@ -133,19 +132,19 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                     }
                     break;
                 }
-                case CookieResponsePacket loginCookieResponsePacket:
+                case CookieResponsePacket cookieResponsePacket:
                 {
                     if (!Ongoing) throw new ProtocolViolationException();
-                    OnCookie.TryRemove(loginCookieResponsePacket.Id, out TaskCompletionSource<Memory<byte>?>? result);
+                    OnCookie.TryRemove(cookieResponsePacket.Id, out TaskCompletionSource<Memory<byte>?>? result);
                     if (result is null) throw new ProtocolViolationException();
-                    result.TrySetResult(loginCookieResponsePacket.Data);
+                    result.TrySetResult(cookieResponsePacket.Data);
                     break;
                 }
-                case CustomResponsePacket loginCustomResponsePacket:
+                case CustomResponsePacket customResponsePacket:
                 {
                     if (!Ongoing) throw new ProtocolViolationException();
-                    if (!OnCustom.TryRemove(loginCustomResponsePacket.Id, out TaskCompletionSource<Memory<byte>?>? response)) throw new ProtocolViolationException();
-                    response.SetResult(loginCustomResponsePacket.Data);
+                    if (!OnCustom.TryRemove(customResponsePacket.Id, out TaskCompletionSource<Memory<byte>?>? response)) throw new ProtocolViolationException();
+                    response.SetResult(customResponsePacket.Data);
                     break;
                 }
                 case EndPacket:
