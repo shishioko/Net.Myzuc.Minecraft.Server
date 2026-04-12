@@ -14,7 +14,7 @@
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="11.0.0-preview.2.26159.112" />
       <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />
       <PackageReference Include="MongoDB.Bson" Version="3.7.1" />
-      <PackageReference Include="Net.Myzuc.Minecraft.Common" Version="0.0.7-alpha" />
+      <!-- <PackageReference Include="Net.Myzuc.Minecraft.Common" Version="0.0.7-alpha" /> -->
       <PackageReference Include="NLog" Version="6.1.2" />
     </ItemGroup>
 
@@ -26,6 +26,12 @@
       <None Update="NLog.config">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Net.Myzuc.Minecraft.Common">
+        <HintPath>..\..\Net.Myzuc.Minecraft.Common\bin\Release\net10.0\Net.Myzuc.Minecraft.Common.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

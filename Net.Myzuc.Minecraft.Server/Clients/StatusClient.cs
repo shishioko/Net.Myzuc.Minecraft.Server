@@ -4,8 +4,8 @@ using Microsoft.VisualStudio.Threading;
 using Net.Myzuc.Minecraft.Common.Protocol;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets;
 using Net.Myzuc.Minecraft.Common.Protocol.Packets.Status;
-using Net.Myzuc.Minecraft.Server.Extensions;
 using Net.Myzuc.Minecraft.Server.Objects.Events;
+using Net.Myzuc.Minecraft.Server.Extensions;
 
 namespace Net.Myzuc.Minecraft.Server.Clients
 {
@@ -18,7 +18,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         {
             
         }
-        internal override async Task<Client?> HandlePacketAsync(Packet packet)
+        internal override async Task<Client?> HandlePacketAsync(IPacket packet)
         {
             switch (packet)
             {

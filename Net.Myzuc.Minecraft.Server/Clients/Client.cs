@@ -21,12 +21,12 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             if (connection.ProtocolStage != protocolStage) throw new InvalidOperationException("Protocol stage mismatches!");
             Connection = connection;
         }
-        protected async Task<Packet> ReadAsync()
+        protected async Task<IPacket> ReadAsync()
         {
             ObjectDisposedException.ThrowIf(Disposed, this);
             return await Connection.ReadAsync();
         }
-        protected async Task WriteAsync(Packet packet)
+        protected async Task WriteAsync(IPacket packet)
         {
             ObjectDisposedException.ThrowIf(Disposed, this);
             await Connection.WriteAsync(packet);
@@ -40,7 +40,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             {
                 while (!Disposed)
                 {
-                    Packet packet = await ReadAsync();
+                    IPacket packet = await ReadAsync();
                     Client? newClient = await HandlePacketAsync(packet);
                     if (Connection.ProtocolStage != ProtocolStage.Disconnected && newClient == null) continue;
                     await OnProtocolStageChange.InvokeAsync(this, new(newClient));
@@ -57,7 +57,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
             }
             return null;
         }
-        internal abstract Task<Client?> HandlePacketAsync(Packet packet);
+        internal abstract Task<Client?> HandlePacketAsync(IPacket packet);
         public virtual void Dispose()
         {
             if (Disposed) return;

@@ -12,7 +12,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
         {
             
         }
-        internal override async Task<Client?> HandlePacketAsync(Packet packet)
+        internal override async Task<Client?> HandlePacketAsync(IPacket packet)
         {
             switch (packet)
             {

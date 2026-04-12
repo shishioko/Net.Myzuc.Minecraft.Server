@@ -101,7 +101,7 @@ namespace Net.Myzuc.Minecraft.Server.Clients
                 Message = message
             });
         }
-        internal override async Task<Client?> HandlePacketAsync(Packet packet)
+        internal override async Task<Client?> HandlePacketAsync(IPacket packet)
         {
             switch (packet)
             {
